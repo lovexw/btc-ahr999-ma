@@ -1,0 +1,149 @@
+    <!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>比特币投资数据中心 - 专业数字资产分析平台</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <!-- 头部导航 -->
+        <header class="header">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fab fa-bitcoin"></i>
+                    <h1>比特币投资数据中心</h1>
+                </div>
+                <div class="header-info">
+                    <span class="update-time">数据更新时间: <span id="updateTime">--</span></span>
+                </div>
+            </div>
+        </header>
+
+        <!-- 主要内容区域 -->
+        <main class="main-content">
+            <!-- 核心价格指标 -->
+            <section class="price-section">
+                <div class="price-card main-price">
+                    <div class="card-header">
+                        <h2><i class="fab fa-bitcoin"></i> 比特币现价</h2>
+                    </div>
+                    <div class="price-display">
+                        <span class="current-price" id="currentPrice">$--,---</span>
+                        <div class="price-change" id="priceChange">
+                            <span class="change-percent">---%</span>
+                            <span class="change-amount">$---</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="price-card">
+                    <div class="card-header">
+                        <h3>今日开盘价</h3>
+                    </div>
+                    <div class="metric-value" id="openPrice">$--,---</div>
+                    <div class="metric-change" id="open-price-change">vs 昨日: ---%</div>
+                </div>
+
+                <div class="price-card">
+                    <div class="card-header">
+                        <h3>市值</h3>
+                    </div>
+                    <div class="metric-value" id="marketCap">$---.--B</div>
+                </div>
+
+                <div class="price-card">
+                    <div class="card-header">
+                        <h3>AHR999囤币指标</h3>
+                    </div>
+                    <div class="ahr-display">
+                        <div class="ahr-value" id="ahrValue">-.--</div>
+                        <div class="ahr-status" id="ahrStatus">
+                            <span class="status-text">--</span>
+                            <div class="status-bar">
+                                <div class="status-fill" id="ahrFill"></div>
+                            </div>
+                        </div>
+                        <div class="ahr-guide">
+                            <div class="guide-item">
+                                <span class="guide-range">&lt; 0.45</span>
+                                <span class="guide-action buy">抄底</span>
+                            </div>
+                            <div class="guide-item">
+                                <span class="guide-range">0.45-1.2</span>
+                                <span class="guide-action hold">定投</span>
+                            </div>
+                            <div class="guide-item">
+                                <span class="guide-range">&gt; 1.2</span>
+                                <span class="guide-action sell">观望</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </section>
+
+            <!-- 均线分析 -->
+            <section class="ma-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-chart-line"></i> 移动平均线分析</h2>
+                    <p>基于历史价格数据计算的关键技术指标</p>
+                </div>
+                <div class="ma-grid">
+                    <div class="ma-card">
+                        <div class="ma-period">MA50</div>
+                        <div class="ma-price" id="ma50">$--,---</div>
+                        <div class="ma-status" id="ma50Status">--</div>
+                    </div>
+                    <div class="ma-card">
+                        <div class="ma-period">MA200</div>
+                        <div class="ma-price" id="ma200">$--,---</div>
+                        <div class="ma-status" id="ma200Status">--</div>
+                    </div>
+                    <div class="ma-card">
+                        <div class="ma-period">MA300</div>
+                        <div class="ma-price" id="ma300">$--,---</div>
+                        <div class="ma-status" id="ma300Status">--</div>
+                    </div>
+                    <div class="ma-card">
+                        <div class="ma-period">MA500</div>
+                        <div class="ma-price" id="ma500">$--,---</div>
+                        <div class="ma-status" id="ma500Status">--</div>
+                    </div>
+                    <div class="ma-card">
+                        <div class="ma-period">MA700</div>
+                        <div class="ma-price" id="ma700">$--,---</div>
+                        <div class="ma-status" id="ma700Status">--</div>
+                    </div>
+                    <div class="ma-card">
+                        <div class="ma-period">MA1400</div>
+                        <div class="ma-price" id="ma1400">$--,---</div>
+                        <div class="ma-status" id="ma1400Status">--</div>
+                    </div>
+                </div>
+            </section>
+
+
+
+
+
+
+
+
+        </main>
+
+        <!-- 页脚 -->
+        <footer class="footer">
+            <div class="footer-content">
+                <p>&copy; 2024 比特币投资数据中心. 专业的数字资产投资分析平台</p>
+                <p class="disclaimer">*本平台提供的信息仅供参考，不构成投资建议。投资有风险，入市需谨慎。</p>
+            </div>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
