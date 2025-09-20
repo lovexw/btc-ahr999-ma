@@ -1,0 +1,138 @@
+name: 自动更新比特币数据
+
+on:
+  schedule:
+    # 每天北京时间0:00执行 (UTC 16:00)
+    - cron: '0 16 * * *'
+  workflow_dispatch: # 允许手动触发
+
+jobs:
+  update-data:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 检出代码
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: 设置Node.js环境
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+    
+    - name: 获取比特币价格并更新CSV
+      run: |
+        # 获取当前日期 (北京时间)
+        CURRENT_DATE=$(TZ='Asia/Shanghai' date '+%Y-%m-%d')
+        echo "📅 当前日期: $CURRENT_DATE"
+        
+        # 获取比特币价格
+        echo "💰 获取比特币价格..."
+        PRICE_DATA=$(curl -s "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true")
+        BTC_PRICE=$(echo $PRICE_DATA | grep -o '"usd":[0-9.]*' | cut -d':' -f2)
+        
+        if [ -z "$BTC_PRICE" ] || [ "$BTC_PRICE" = "null" ]; then
+          echo "❌ CoinGecko API失败，尝试备用API..."
+          # 备用API: CoinDesk
+          PRICE_DATA=$(curl -s "https://api.coindesk.com/v1/bpi/currentprice.json")
+          BTC_PRICE=$(echo $PRICE_DATA | grep -o '"rate_float":[0-9.]*' | cut -d':' -f2)
+        fi
+        
+        if [ -z "$BTC_PRICE" ] || [ "$BTC_PRICE" = "null" ]; then
+          echo "❌ 所有价格API都失败了，退出"
+          exit 1
+        fi
+        
+        # 四舍五入到整数
+        BTC_PRICE=$(printf "%.0f" $BTC_PRICE)
+        echo "✅ 获取到价格: $BTC_PRICE"
+        
+        # 检查今天的数据是否已存在
+        if grep -q "^$CURRENT_DATE," btc-price.csv; then
+          echo "📝 更新今日价格数据..."
+          # 更新现有记录 (macOS兼容的sed语法)
+          if [[ "$OSTYPE" == "darwin"* ]]; then
+            sed -i '' "s/^$CURRENT_DATE,.*/$CURRENT_DATE,$BTC_PRICE/" btc-price.csv
+          else
+            sed -i "s/^$CURRENT_DATE,.*/$CURRENT_DATE,$BTC_PRICE/" btc-price.csv
+          fi
+        else
+          echo "📝 添加新的价格数据..."
+          # 创建临时文件，将新数据插入到第二行（保持表头）
+          head -n 1 btc-price.csv > temp.csv
+          echo "$CURRENT_DATE,$BTC_PRICE" >> temp.csv
+          tail -n +2 btc-price.csv >> temp.csv
+          mv temp.csv btc-price.csv
+        fi
+        
+        echo "✅ CSV文件已更新"
+        
+        # 显示最新的几条记录
+        echo "📊 最新价格记录:"
+        head -n 6 btc-price.csv
+        
+        # 保存价格到环境变量供后续步骤使用
+        echo "BTC_PRICE=$BTC_PRICE" >> $GITHUB_ENV
+        echo "CURRENT_DATE=$CURRENT_DATE" >> $GITHUB_ENV
+    
+    - name: 验证CSV文件格式
+      run: |
+        echo "🔍 验证CSV文件..."
+        
+        # 检查文件是否存在
+        if [ ! -f "btc-price.csv" ]; then
+          echo "❌ CSV文件不存在"
+          exit 1
+        fi
+        
+        # 检查文件行数
+        LINE_COUNT=$(wc -l < btc-price.csv)
+        echo "📊 CSV文件共有 $LINE_COUNT 行数据"
+        
+        # 检查最新数据格式
+        LATEST_LINE=$(head -n 2 btc-price.csv | tail -n 1)
+        echo "📝 最新数据: $LATEST_LINE"
+        
+        # 验证日期格式
+        if echo "$LATEST_LINE" | grep -q "^[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\},[0-9]\+$"; then
+          echo "✅ 数据格式正确"
+        else
+          echo "❌ 数据格式错误"
+          exit 1
+        fi
+    
+    - name: 提交更改到GitHub
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action Bot"
+        
+        # 检查是否有更改
+        if git diff --quiet btc-price.csv; then
+          echo "📝 价格没有变化，跳过提交"
+        else
+          git add btc-price.csv
+          git commit -m "🤖 自动更新比特币价格: $CURRENT_DATE - \$$BTC_PRICE
+
+📊 数据更新:
+- 日期: $CURRENT_DATE
+- 价格: \$$BTC_PRICE
+- 更新时间: $(TZ='Asia/Shanghai' date '+%Y-%m-%d %H:%M:%S %Z')
+- 数据来源: CoinGecko API
+
+🔄 此更新将自动触发Cloudflare Pages重新部署"
+          
+          git push
+          echo "✅ 价格数据已提交，Cloudflare Pages将自动重新部署"
+        fi
+    
+    - name: 创建部署状态报告
+      run: |
+        echo "📋 部署状态报告"
+        echo "================="
+        echo "📅 更新日期: $CURRENT_DATE"
+        echo "💰 比特币价格: \$$BTC_PRICE"
+        echo "📊 CSV记录数: $(wc -l < btc-price.csv)"
+        echo "🚀 Cloudflare Pages: 将自动重新部署"
+        echo "🌐 网站地址: https://btc-ahr999-ma.pages.dev (或您的自定义域名)"
+        echo "================="
